@@ -268,6 +268,7 @@ footer a{color:var(--muted)}footer a:hover{color:var(--gold)}footer .admin{opaci
   <span class="arrow next" id="lbNext">›</span>
 </div>
 
+<script src="firebase-config.js"></script>
 <script>
 const nav=document.getElementById('nav');
 addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40));
@@ -301,6 +302,30 @@ addEventListener('keydown',e=>{if(!lb.classList.contains('open'))return;if(e.key
 function countUp(el,t){if(!t){el.textContent='Live soon';return}let t0=performance.now();const f=v=>{v=Math.round(v);return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?Math.round(v/1e3)+'K':v.toLocaleString();};(function tick(n){const k=Math.min(1,(n-t0)/1400);el.textContent=f(t*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(t0)}
 let ytDone=false;
 fetch('youtube.json').then(r=>r.json()).then(d=>{const o=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting&&!ytDone){ytDone=true;countUp(document.getElementById('ytSubs'),d.subscribers);countUp(document.getElementById('ytViews'),d.views)}}),{threshold:.4});o.observe(document.querySelector('.yt'))}).catch(()=>{});
+
+/* Live photos: append anything uploaded via the Studio. Safe no-op until Firebase is configured. */
+(async function(){
+  try{
+    const cfg=window.firebaseConfig;
+    if(!cfg||!cfg.apiKey||cfg.apiKey.startsWith('PASTE'))return;
+    const {initializeApp,getApps}=await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js');
+    const {getFirestore,collection,getDocs,query,orderBy}=await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+    const app=getApps().length?getApps()[0]:initializeApp(cfg);
+    const db=getFirestore(app);
+    const snap=await getDocs(query(collection(db,'photos'),orderBy('created','desc')));
+    snap.forEach(docu=>{
+      const p=docu.data();const i=PHOTOS.length;PHOTOS.push(p);
+      const t=document.createElement('div');t.className='tile show';
+      t.innerHTML=`${p.forSale?'<span class="sale">Print available</span>':''}<img src="${p.src}" alt="${p.title}" loading="lazy"/><div class="meta"><h4>${p.title}</h4><span>${p.location} · ${p.year}</span></div>`;
+      t.addEventListener('click',()=>openLB(i));masonry.appendChild(t);
+      if(p.forSale){
+        const pt=document.createElement('div');pt.className='tile show';
+        pt.innerHTML=`<img src="${p.src}" alt="${p.title}" loading="lazy"/><div class="meta"><h4>${p.title}</h4><span>${p.location}${p.price?' · '+p.price:''}</span></div>`;
+        pt.addEventListener('click',()=>openLB(i));printGrid.appendChild(pt);
+      }
+    });
+  }catch(e){console.warn('Live photos load skipped:',e);}
+})();
 </script>
 </body>
 </html>

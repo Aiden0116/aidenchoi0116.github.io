@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Studio — Aiden J. Choi</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Archivo:wght@300..700&display=swap" rel="stylesheet"/>
+<script src="firebase-config.js"></script>
 <style>
 :root{--ink:#0a0a0c;--panel:#15151b;--paper:#ECE8E1;--muted:#9a968e;--gold:#c8a06a;--line:rgba(236,232,225,.12)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -25,14 +26,19 @@ button:hover{opacity:.9}button.ghost{background:transparent;border:1px solid var
 .app{max-width:920px;margin:0 auto}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
 .topbar button{width:auto;margin:0;padding:10px 18px;font-size:.8rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:24px}
+.aistatus{font-size:.78rem;color:var(--gold);margin-top:10px;min-height:1em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:24px}
 .item{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
-.item img{width:100%;height:130px;object-fit:cover}
+.item img{width:100%;height:130px;object-fit:cover;display:block}
 .item .info{padding:8px 10px;font-size:.78rem}
 .item .info b{font-family:"Fraunces",serif;font-weight:400;display:block}
 .item .info span{color:var(--muted);font-size:.7rem}
 .item .del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:0;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;margin:0;padding:0}
-.note{background:rgba(200,160,106,.08);border:1px solid rgba(200,160,106,.25);border-radius:10px;padding:14px 16px;font-size:.85rem;color:#d8d3c8;margin-bottom:20px}
+.mini{width:auto;margin:8px 0 0;padding:6px 12px;font-size:.72rem;background:transparent;border:1px solid var(--line);color:var(--paper);border-radius:20px;letter-spacing:.04em}
+.editp{padding:8px 10px;border-top:1px solid var(--line)}
+.editp input,.editp select{margin-bottom:6px;padding:8px;font-size:.85rem}
+.editp .saveBtn{margin-top:4px;padding:8px}
+.note{background:rgba(200,160,106,.08);border:1px solid rgba(200,160,106,.25);border-radius:10px;padding:14px 16px;font-size:.85rem;color:#d8d3c8;margin-bottom:20px;line-height:1.5}
 .note code{color:var(--gold)}
 .bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:10px;display:none}
 .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
@@ -47,9 +53,9 @@ a{color:var(--gold)}
   <p class="sub">Private dashboard for uploading photos.</p>
   <div class="note">
     <b>One-time setup needed.</b><br>
-    This panel is ready, but it needs your free Firebase keys to switch on. Open <code>admin.html</code>,
-    paste your Firebase config into the <code>firebaseConfig</code> block near the top of the script, and create
-    your login in the Firebase console. The README walks through every step from your phone.
+    This panel is ready, but it needs your free Firebase keys to switch on. Open
+    <code>firebase-config.js</code>, paste your Firebase web config, and create your login in the
+    Firebase console. The setup guide walks through every step from your phone.
   </div>
   <p class="sub">Once configured, this notice disappears and the login form appears.</p>
 </div>
@@ -73,6 +79,7 @@ a{color:var(--gold)}
 
   <div class="box" style="margin:0 0 8px">
     <label>Photo file</label><input id="file" type="file" accept="image/*"/>
+    <div class="aistatus" id="aiStatus"></div>
     <div class="row">
       <div><label>Title</label><input id="title" placeholder="City of Light"/></div>
       <div><label>Location</label>
@@ -85,6 +92,7 @@ a{color:var(--gold)}
         <select id="forSale"><option value="false">No</option><option value="true">Yes</option></select>
       </div>
     </div>
+    <button class="mini" id="aiBtn" style="width:100%;margin-top:6px">✨ Re-name with AI</button>
     <button id="uploadBtn">Upload photo</button>
     <div class="bar" id="bar"><i></i></div>
     <div id="upMsg" class="msg"></div>
@@ -95,38 +103,33 @@ a{color:var(--gold)}
 
 <script type="module">
 // ============================================================
-//  PASTE YOUR FIREBASE CONFIG HERE  (Firebase console → Project settings → Web app)
-//  Leave the apiKey as "PASTE..." and this panel stays in setup mode.
+//  Config comes from firebase-config.js (window.firebaseConfig) — paste once there.
+//  AI model + SDK versions are constants so they're easy to bump later.
 // ============================================================
-const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "PASTE.firebaseapp.com",
-  projectId: "PASTE",
-  storageBucket: "PASTE.appspot.com",
-  messagingSenderId: "PASTE",
-  appId: "PASTE"
-};
+const AI_MODEL = "gemini-3.5-flash";   // current multimodal model on the free Gemini Developer API
+const CORE_VER = "12.14.0";            // Firebase JS SDK for auth/firestore/storage (rock solid)
+const AI_VER   = "12.14.0";            // Firebase JS SDK that includes the AI Logic module
 // ============================================================
 
-const configured = !firebaseConfig.apiKey.startsWith("PASTE");
-const $=id=>document.getElementById(id);
+const cfg = window.firebaseConfig;
+const configured = cfg && typeof cfg.apiKey === "string" && !cfg.apiKey.startsWith("PASTE");
+const $ = id => document.getElementById(id);
 
-if(!configured){
-  // stay on setup notice
-} else {
+if(configured){
   $('setupNote').classList.add('hidden');
   $('login').classList.remove('hidden');
 
-  const [{initializeApp},{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged},
-         {getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,serverTimestamp},
+  const [{initializeApp},
+         {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged},
+         {getFirestore,collection,addDoc,getDocs,deleteDoc,updateDoc,doc,query,orderBy,serverTimestamp},
          {getStorage,ref,uploadBytesResumable,getDownloadURL,deleteObject}] = await Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"),
+    import(`https://www.gstatic.com/firebasejs/${CORE_VER}/firebase-app.js`),
+    import(`https://www.gstatic.com/firebasejs/${CORE_VER}/firebase-auth.js`),
+    import(`https://www.gstatic.com/firebasejs/${CORE_VER}/firebase-firestore.js`),
+    import(`https://www.gstatic.com/firebasejs/${CORE_VER}/firebase-storage.js`),
   ]);
 
-  const app=initializeApp(firebaseConfig);
+  const app=initializeApp(cfg);
   const auth=getAuth(app), db=getFirestore(app), storage=getStorage(app);
 
   onAuthStateChanged(auth,user=>{
@@ -137,10 +140,50 @@ if(!configured){
   $('loginBtn').onclick=async()=>{
     const m=$('loginMsg');m.className='msg';
     try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value);}
-    catch(e){m.className='msg err';m.textContent=e.message;}
+    catch(e){m.className='msg err';m.textContent=friendly(e);}
   };
   $('logoutBtn').onclick=()=>signOut(auth);
 
+  // ---------- AI naming (isolated: failure here never blocks uploads) ----------
+  let aiModel=null, aiTried=false;
+  function fileToB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+  async function getAiModel(){
+    if(aiModel) return aiModel;
+    if(aiTried) return null;
+    aiTried=true;
+    try{
+      const appMod=await import(`https://www.gstatic.com/firebasejs/${AI_VER}/firebase-app.js`);
+      const aiMod =await import(`https://www.gstatic.com/firebasejs/${AI_VER}/firebase-ai.js`);
+      const existing=appMod.getApps().find(a=>a.name==='aiapp');
+      const aiApp=existing||appMod.initializeApp(cfg,'aiapp');
+      const ai=aiMod.getAI(aiApp,{backend:new aiMod.GoogleAIBackend()});
+      aiModel=aiMod.getGenerativeModel(ai,{model:AI_MODEL});
+      return aiModel;
+    }catch(e){console.warn('AI init failed:',e);return null;}
+  }
+  async function autoName(file){
+    const s=$('aiStatus');
+    const model=await getAiModel();
+    if(!model){s.textContent='AI naming unavailable — just type a title.';return;}
+    s.textContent='✨ Looking at your photo…';
+    try{
+      const b64=await fileToB64(file);
+      const prompt='You are titling a photograph for a fine-art photography portfolio. '+
+        'Look at the image and reply with ONLY compact JSON, no markdown and no extra words: '+
+        '{"title":"<short evocative 2-4 word title in Title Case>","location":"<Seoul or Vancouver, or empty string if not clearly either>"}';
+      const res=await model.generateContent([prompt,{inlineData:{mimeType:file.type||'image/jpeg',data:b64}}]);
+      let txt=res.response.text().replace(/```json/gi,'').replace(/```/g,'').trim();
+      const obj=JSON.parse(txt);
+      if(obj.title && !$('title').value) $('title').value=obj.title;
+      else if(obj.title) $('title').value=obj.title;
+      if(obj.location==='Seoul'||obj.location==='Vancouver') $('location').value=obj.location;
+      s.textContent='✨ Suggested a title — tweak it if you like.';
+    }catch(e){console.warn('AI name failed:',e);s.textContent='Could not auto-name this one — just type a title.';}
+  }
+  $('file').onchange=e=>{const f=e.target.files[0];$('aiStatus').textContent='';if(f)autoName(f);};
+  $('aiBtn').onclick=()=>{const f=$('file').files[0];if(f)autoName(f);else $('aiStatus').textContent='Choose a photo first.';};
+
+  // ---------- Upload ----------
   $('uploadBtn').onclick=()=>{
     const f=$('file').files[0],m=$('upMsg');m.className='msg';
     if(!f){m.className='msg err';m.textContent='Choose a photo first.';return;}
@@ -149,41 +192,82 @@ if(!configured){
     const bar=$('bar');bar.style.display='block';
     task.on('state_changed',
       s=>bar.querySelector('i').style.width=(s.bytesTransferred/s.totalBytes*100)+'%',
-      e=>{m.className='msg err';m.textContent=e.message;},
+      e=>{m.className='msg err';m.textContent=friendly(e);bar.style.display='none';},
       async()=>{
         const url=await getDownloadURL(task.snapshot.ref);
         await addDoc(collection(db,'photos'),{
           src:url,storagePath:path,
-          title:$('title').value||'Untitled',
+          title:$('title').value.trim()||'Untitled',
           location:$('location').value,
-          year:$('year').value||String(new Date().getFullYear()),
+          year:$('year').value.trim()||String(new Date().getFullYear()),
           forSale:$('forSale').value==='true',
           price:'',created:serverTimestamp()
         });
-        m.className='msg ok';m.textContent='Uploaded ✓';
+        m.className='msg ok';m.textContent='Uploaded ✓ — it’s now live on your site.';
         bar.style.display='none';bar.querySelector('i').style.width='0';
-        $('file').value='';$('title').value='';
+        $('file').value='';$('title').value='';$('aiStatus').textContent='';
         loadGallery();
       });
   };
 
+  // ---------- Manage (edit + delete) ----------
   async function loadGallery(){
-    const g=$('gallery');g.innerHTML='';
+    const g=$('gallery');g.innerHTML='<p class="sub">Loading…</p>';
     const snap=await getDocs(query(collection(db,'photos'),orderBy('created','desc')));
+    g.innerHTML='';
+    if(!snap.size){g.innerHTML='<p class="sub">No photos yet — upload your first above.</p>';return;}
     snap.forEach(d=>{
       const p=d.data();
       const el=document.createElement('div');el.className='item';
-      el.innerHTML=`<button class="del" title="Delete">×</button>
-        <img src="${p.src}"/><div class="info"><b>${p.title}</b><span>${p.location} · ${p.year}${p.forSale?' · print':''}</span></div>`;
+      el.innerHTML=
+        `<button class="del" title="Delete">×</button>
+         <img src="${p.src}"/>
+         <div class="info">
+           <b>${esc(p.title)}</b>
+           <span>${esc(p.location)} · ${esc(p.year)}${p.forSale?' · print':''}</span>
+           <button class="mini editBtn">Edit</button>
+         </div>
+         <div class="editp hidden">
+           <input class="eTitle" value="${esc(p.title)}"/>
+           <select class="eLoc">
+             <option${p.location==='Vancouver'?' selected':''}>Vancouver</option>
+             <option${p.location==='Seoul'?' selected':''}>Seoul</option>
+             <option${(p.location!=='Vancouver'&&p.location!=='Seoul')?' selected':''}>Other</option>
+           </select>
+           <select class="eSale">
+             <option value="false"${!p.forSale?' selected':''}>Not for sale</option>
+             <option value="true"${p.forSale?' selected':''}>For sale as print</option>
+           </select>
+           <button class="mini saveBtn" style="width:100%">Save changes</button>
+         </div>`;
+      const editp=el.querySelector('.editp');
+      el.querySelector('.editBtn').onclick=()=>editp.classList.toggle('hidden');
+      el.querySelector('.saveBtn').onclick=async(ev)=>{
+        const btn=ev.target;btn.textContent='Saving…';
+        try{
+          await updateDoc(doc(db,'photos',d.id),{
+            title:el.querySelector('.eTitle').value.trim()||'Untitled',
+            location:el.querySelector('.eLoc').value,
+            forSale:el.querySelector('.eSale').value==='true'
+          });
+          loadGallery();
+        }catch(e){btn.textContent='Error — retry';}
+      };
       el.querySelector('.del').onclick=async()=>{
-        if(!confirm('Delete "'+p.title+'"?'))return;
+        if(!confirm('Delete "'+p.title+'"? This removes it from your site.'))return;
         try{if(p.storagePath)await deleteObject(ref(storage,p.storagePath));}catch(e){}
         await deleteDoc(doc(db,'photos',d.id));loadGallery();
       };
       g.appendChild(el);
     });
-    if(!snap.size)g.innerHTML='<p class="sub">No photos yet — upload your first above.</p>';
   }
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function friendly(e){const c=(e&&e.code)||'';
+    if(c.includes('wrong-password')||c.includes('invalid-credential'))return 'Wrong email or password.';
+    if(c.includes('user-not-found'))return 'No account with that email. Create it in the Firebase console.';
+    if(c.includes('too-many-requests'))return 'Too many tries — wait a moment.';
+    return (e&&e.message)||'Something went wrong.';}
 }
 </script>
 </body>
