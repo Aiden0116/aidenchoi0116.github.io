@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio — Aiden J. Choi</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Archivo:wght@300..700&display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:#0a0a0c;--panel:#15151b;--paper:#ECE8E1;--muted:#9a968e;--gold:#c8a06a;--line:rgba(236,232,225,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font-family:"Archivo",sans-serif;font-weight:300;min-height:100vh;padding:24px}
+h1{font-family:"Fraunces",serif;font-weight:340;font-size:1.8rem;margin-bottom:4px}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:24px}
+.box{max-width:560px;margin:8vh auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px}
+label{display:block;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+input,select{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--paper);padding:13px 14px;border-radius:8px;font-family:inherit;font-size:1rem}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+button{margin-top:18px;width:100%;background:var(--gold);color:#1a1408;border:0;padding:14px;border-radius:30px;font-family:inherit;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:.3s}
+button:hover{opacity:.9}button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.row{display:flex;gap:12px}.row>*{flex:1}
+.msg{margin-top:14px;font-size:.85rem;padding:10px 12px;border-radius:8px;display:none}
+.msg.err{display:block;background:rgba(200,80,80,.12);color:#e89a9a}
+.msg.ok{display:block;background:rgba(120,180,120,.12);color:#a6d6a6}
+.hidden{display:none}
+.app{max-width:920px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.topbar button{width:auto;margin:0;padding:10px 18px;font-size:.8rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:24px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+.item img{width:100%;height:130px;object-fit:cover}
+.item .info{padding:8px 10px;font-size:.78rem}
+.item .info b{font-family:"Fraunces",serif;font-weight:400;display:block}
+.item .info span{color:var(--muted);font-size:.7rem}
+.item .del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:0;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;margin:0;padding:0}
+.note{background:rgba(200,160,106,.08);border:1px solid rgba(200,160,106,.25);border-radius:10px;padding:14px 16px;font-size:.85rem;color:#d8d3c8;margin-bottom:20px}
+.note code{color:var(--gold)}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:10px;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+a{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- Setup notice shown until Firebase is configured -->
+<div id="setupNote" class="box">
+  <h1>Studio access</h1>
+  <p class="sub">Private dashboard for uploading photos.</p>
+  <div class="note">
+    <b>One-time setup needed.</b><br>
+    This panel is ready, but it needs your free Firebase keys to switch on. Open <code>admin.html</code>,
+    paste your Firebase config into the <code>firebaseConfig</code> block near the top of the script, and create
+    your login in the Firebase console. The README walks through every step from your phone.
+  </div>
+  <p class="sub">Once configured, this notice disappears and the login form appears.</p>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="box hidden">
+  <h1>Studio access</h1>
+  <p class="sub">Sign in to manage your gallery.</p>
+  <label>Email</label><input id="email" type="email" autocomplete="username"/>
+  <label>Password</label><input id="password" type="password" autocomplete="current-password"/>
+  <button id="loginBtn">Sign in</button>
+  <div id="loginMsg" class="msg"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash" class="app hidden">
+  <div class="topbar">
+    <div><h1>Studio</h1><p class="sub" style="margin:0">Upload &amp; manage photographs</p></div>
+    <button class="ghost" id="logoutBtn">Sign out</button>
+  </div>
+
+  <div class="box" style="margin:0 0 8px">
+    <label>Photo file</label><input id="file" type="file" accept="image/*"/>
+    <div class="row">
+      <div><label>Title</label><input id="title" placeholder="City of Light"/></div>
+      <div><label>Location</label>
+        <select id="location"><option>Vancouver</option><option>Seoul</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>Year</label><input id="year" placeholder="2026"/></div>
+      <div><label>For sale as print?</label>
+        <select id="forSale"><option value="false">No</option><option value="true">Yes</option></select>
+      </div>
+    </div>
+    <button id="uploadBtn">Upload photo</button>
+    <div class="bar" id="bar"><i></i></div>
+    <div id="upMsg" class="msg"></div>
+  </div>
+
+  <div class="grid" id="gallery"></div>
+</div>
+
+<script type="module">
+// ============================================================
+//  PASTE YOUR FIREBASE CONFIG HERE  (Firebase console → Project settings → Web app)
+//  Leave the apiKey as "PASTE..." and this panel stays in setup mode.
+// ============================================================
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_API_KEY",
+  authDomain: "PASTE.firebaseapp.com",
+  projectId: "PASTE",
+  storageBucket: "PASTE.appspot.com",
+  messagingSenderId: "PASTE",
+  appId: "PASTE"
+};
+// ============================================================
+
+const configured = !firebaseConfig.apiKey.startsWith("PASTE");
+const $=id=>document.getElementById(id);
+
+if(!configured){
+  // stay on setup notice
+} else {
+  $('setupNote').classList.add('hidden');
+  $('login').classList.remove('hidden');
+
+  const [{initializeApp},{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged},
+         {getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,serverTimestamp},
+         {getStorage,ref,uploadBytesResumable,getDownloadURL,deleteObject}] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"),
+  ]);
+
+  const app=initializeApp(firebaseConfig);
+  const auth=getAuth(app), db=getFirestore(app), storage=getStorage(app);
+
+  onAuthStateChanged(auth,user=>{
+    if(user){$('login').classList.add('hidden');$('dash').classList.remove('hidden');loadGallery();}
+    else{$('login').classList.remove('hidden');$('dash').classList.add('hidden');}
+  });
+
+  $('loginBtn').onclick=async()=>{
+    const m=$('loginMsg');m.className='msg';
+    try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value);}
+    catch(e){m.className='msg err';m.textContent=e.message;}
+  };
+  $('logoutBtn').onclick=()=>signOut(auth);
+
+  $('uploadBtn').onclick=()=>{
+    const f=$('file').files[0],m=$('upMsg');m.className='msg';
+    if(!f){m.className='msg err';m.textContent='Choose a photo first.';return;}
+    const path='photos/'+Date.now()+'_'+f.name.replace(/[^a-z0-9.]/gi,'_');
+    const task=uploadBytesResumable(ref(storage,path),f);
+    const bar=$('bar');bar.style.display='block';
+    task.on('state_changed',
+      s=>bar.querySelector('i').style.width=(s.bytesTransferred/s.totalBytes*100)+'%',
+      e=>{m.className='msg err';m.textContent=e.message;},
+      async()=>{
+        const url=await getDownloadURL(task.snapshot.ref);
+        await addDoc(collection(db,'photos'),{
+          src:url,storagePath:path,
+          title:$('title').value||'Untitled',
+          location:$('location').value,
+          year:$('year').value||String(new Date().getFullYear()),
+          forSale:$('forSale').value==='true',
+          price:'',created:serverTimestamp()
+        });
+        m.className='msg ok';m.textContent='Uploaded ✓';
+        bar.style.display='none';bar.querySelector('i').style.width='0';
+        $('file').value='';$('title').value='';
+        loadGallery();
+      });
+  };
+
+  async function loadGallery(){
+    const g=$('gallery');g.innerHTML='';
+    const snap=await getDocs(query(collection(db,'photos'),orderBy('created','desc')));
+    snap.forEach(d=>{
+      const p=d.data();
+      const el=document.createElement('div');el.className='item';
+      el.innerHTML=`<button class="del" title="Delete">×</button>
+        <img src="${p.src}"/><div class="info"><b>${p.title}</b><span>${p.location} · ${p.year}${p.forSale?' · print':''}</span></div>`;
+      el.querySelector('.del').onclick=async()=>{
+        if(!confirm('Delete "'+p.title+'"?'))return;
+        try{if(p.storagePath)await deleteObject(ref(storage,p.storagePath));}catch(e){}
+        await deleteDoc(doc(db,'photos',d.id));loadGallery();
+      };
+      g.appendChild(el);
+    });
+    if(!snap.size)g.innerHTML='<p class="sub">No photos yet — upload your first above.</p>';
+  }
+}
+</script>
+</body>
+</html>
