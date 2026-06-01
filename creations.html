@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Aiden J. Choi — Photographer · iOS Developer · Creator</title>
-<meta name="description" content="Aiden J. Choi (Jinseo Choi) — photographer, iOS developer, and creator between Seoul and Vancouver."/>
+<title>Creations — Aiden J. Choi</title>
+<meta name="description" content="ThinkTwin iOS app, AC Studios handmade keycaps, and Booze & Foods on YouTube — by Aiden J. Choi."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Archivo:wght@300..700&display=swap" rel="stylesheet"/>
@@ -166,76 +166,64 @@ footer a{color:var(--muted)}footer a:hover{color:var(--gold)}footer .admin{opaci
 <nav id="nav">
   <a class="brand" href="index.html"><img src="logo-white.png" alt="Aiden J. Choi"/></a>
   <div class="navlinks" id="navlinks">
-    <a href="index.html" class="active">Home</a>
+    <a href="index.html">Home</a>
     <a href="photography.html">Photography</a>
-    <a href="creations.html">Creations</a>
+    <a href="creations.html" class="active">Creations</a>
     <a href="index.html#contact">Contact</a>
   </div>
   <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
 </nav>
 
-<header class="hero" id="top">
-  <div class="hero-bg"><img src="hero.jpg" alt=""/></div>
-  <div class="hero-inner wrap">
-    <div class="eyebrow">Photographer &middot; iOS Developer</div>
-    <h1><span class="l" style="animation-delay:.2s">Aiden</span> <span class="l" style="animation-delay:.34s">J.&nbsp;Choi</span></h1>
-    <div class="realname">Jinseo&nbsp;Choi &middot; 최진서</div>
-  </div>
-  <div class="scrollcue"><span class="bar"></span><span>Scroll</span></div>
-</header>
-<section id="about">
-  <div class="wrap about-grid">
-    <div class="about-copy">
-      <div class="eyebrow reveal">About</div>
-      <h2 class="section-title reveal d1">Between a camera<br>and a code editor.</h2>
-      <p class="lead reveal d1">I'm Aiden Jinseo Choi &mdash; I work between photography and software, and between Seoul and Vancouver.</p>
-      <p class="reveal d2">Photography came first: a way to pay attention and keep the things that would otherwise pass. The rest grew from the same habit &mdash; I build iOS apps like <strong>ThinkTwin</strong>, handcraft keycaps under <strong>AC Studios</strong>, and run a food-and-drink channel, <strong>Booze &amp; Foods</strong>, on YouTube.</p>
-      <p class="reveal d2">Right now I'm doing my service in the Korean military, still making things in the margins. This is where the work lives.</p>
-    </div>
-    <div class="about-photos reveal d2">
-      <img class="p-main" src="about-1.jpg" alt="Aiden J. Choi"/>
-      <img class="p-sub" src="about-2.jpg" alt="Aiden J. Choi"/>
-      <span class="tag">Seoul &times; Vancouver</span>
-    </div>
-  </div>
-</section>
-<section id="work">
+<section class="page-head">
   <div class="wrap">
-    <div class="eyebrow reveal">The Work</div>
-    <h2 class="section-title reveal d1">Two practices,<br>one way of <em>seeing.</em></h2>
-    <div class="teasers">
-      <div class="teaser reveal">
-        <div class="txt">
-          <div class="num">01</div><h3>Photography</h3>
-          <p>Quiet, cinematic frames from Seoul and Vancouver &mdash; skylines, harbour light, and the spaces in between. Selected pieces are available as prints.</p>
-          <a class="enter" href="photography.html">Enter the gallery &rarr;</a>
+    <div class="eyebrow reveal">Creations</div>
+    <h2 class="section-title reveal d1">Things I've <em>made.</em></h2>
+    <div class="creations-grid">
+      <div class="card thinktwin reveal d1">
+        <img class="ic" src="thinktwin.png" alt="ThinkTwin"/>
+        <div>
+          <div class="ribbon">iOS App &middot; Powered by Claude</div>
+          <h3>ThinkTwin</h3>
+          <p>An AI debate partner that pushes back. Drop in any take and get a sharp, instant counter-argument &mdash; built to make you think twice. Four personalities, free with an optional Plus tier, iOS 17+.</p>
+          <a class="btn" href="https://www.thinktwin.app" target="_blank" rel="noopener">Visit ThinkTwin &rarr;</a>
         </div>
-        <a class="shot" href="photography.html"><img src="p1.jpg" alt="Photography"/></a>
       </div>
-      <div class="teaser flip reveal">
-        <div class="txt">
-          <div class="num">02</div><h3>Creations</h3>
-          <p>The things I make outside the frame &mdash; the ThinkTwin iOS app, handmade keycaps under AC Studios, and Booze &amp; Foods on YouTube.</p>
-          <a class="enter" href="creations.html">See what I've made &rarr;</a>
+      <div class="card reveal d1">
+        <div class="ribbon">Handmade &middot; AC Studios</div>
+        <h3>AC Studios</h3>
+        <p>Handcrafted artisan keycaps and small-batch pieces, each one made by hand. The shop lives on Instagram for now.</p>
+        <a class="btn" href="https://www.instagram.com/artkey_keycaps" target="_blank" rel="noopener">See the keycaps &rarr;</a>
+      </div>
+      <div class="card yt reveal d2">
+        <div class="ribbon">YouTube &middot; Food &amp; Drink</div>
+        <h3>Booze &amp; Foods</h3>
+        <p>A running tour through food and drink &mdash; tastings, the places worth a detour, and the occasional very good bottle.</p>
+        <div class="counts"><div><b id="ytSubs">&mdash;</b><small>Subscribers</small></div><div><b id="ytViews">&mdash;</b><small>Total Views</small></div></div>
+        <a class="btn" href="https://youtube.com/@aidenjchoi" target="_blank" rel="noopener">Watch &rarr;</a>
+      </div>
+      <div class="card reveal d1" id="prints" style="grid-column:1/-1">
+        <div class="ribbon">Prints &middot; For Sale</div>
+        <h3>Fine-art prints</h3>
+        <p>Selected frames from Seoul and Vancouver, available as prints. To reserve one, reach out &mdash; message me on Instagram or send an email and I'll sort out sizing, pricing, and shipping.</p>
+        <div class="masonry" id="printGrid" style="column-count:3;margin-top:24px"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px">
+          <a class="btn" href="https://www.instagram.com/aidenc_studios" target="_blank" rel="noopener">DM on Instagram</a>
+          <a class="btn" href="mailto:aidenchoi0116@gmail.com?subject=Print%20inquiry">Email me</a>
         </div>
-        <a class="shot panel" href="creations.html"><img src="thinktwin.png" alt="Creations"/></a>
       </div>
     </div>
   </div>
-</section>
-<section id="contact">
-  <div class="wrap">
-    <img class="script reveal" src="signature.png" alt="Aiden"/>
-    <div class="eyebrow reveal">Contact</div>
-    <h2 class="reveal d1">Let's make something.</h2>
-    <div class="contact-links reveal d2">
-      <a href="https://www.instagram.com/aidenc_studios" target="_blank" rel="noopener">Instagram &mdash; @aidenc_studios</a>
-      <a href="mailto:aidenchoi0116@gmail.com">aidenchoi0116@gmail.com</a>
-    </div>
-  </div>
-  <footer><div class="wrap">&copy; <span id="yr"></span> Aiden Jinseo Choi &middot; Seoul &times; Vancouver &nbsp;&middot;&nbsp; <a class="admin" href="admin.html">Studio</a></div></footer>
 </section>
 
+<div class="lb" id="lb">
+  <span class="x" id="lbClose">&times;</span>
+  <span class="arrow prev" id="lbPrev">&lsaquo;</span>
+  <img id="lbImg" src="" alt=""/>
+  <div class="cap"><h4 id="lbTitle"></h4><span id="lbLoc"></span></div>
+  <span class="arrow next" id="lbNext">&rsaquo;</span>
+</div>
+<footer><div class="wrap">&copy; <span id="yr"></span> Aiden Jinseo Choi &middot; Seoul &times; Vancouver &nbsp;&middot;&nbsp; <a class="admin" href="admin.html">Studio</a></div></footer>
+<script src="firebase-config.js"></script>
 <script>
 
 const nav=document.getElementById('nav');
@@ -246,6 +234,43 @@ lk.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{tg.classList
 document.getElementById('yr').textContent=new Date().getFullYear();
 const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.14});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+const PHOTOS=[
+{src:'p1.jpg',title:'Seoul Skyline',location:'Seoul',year:'2024',forSale:true,price:''},
+{src:'p2.jpg',title:'Coal Harbour',location:'Vancouver',year:'2024',forSale:true,price:''},
+{src:'p3.jpg',title:'Lotte Tower',location:'Seoul',year:'2024',forSale:true,price:''},
+{src:'p4.jpg',title:'Lions Gate',location:'Vancouver',year:'2024',forSale:true,price:''}
+];
+const printGrid=document.getElementById('printGrid');
+function addPrint(p,i){
+  const t=document.createElement('div');t.className='tile';
+  t.innerHTML=`<img src="${p.src}" alt="${p.title}" loading="lazy"/><div class="meta"><h4>${p.title}</h4><span>${p.location}${p.price?' \u00b7 '+p.price:''}</span></div>`;
+  t.addEventListener('click',()=>openLB(i));printGrid.appendChild(t);
+}
+PHOTOS.forEach((p,i)=>addPrint(p,i));
+
+let cur=0;const lb=document.getElementById('lb'),lbImg=document.getElementById('lbImg'),lbTitle=document.getElementById('lbTitle'),lbLoc=document.getElementById('lbLoc');
+function openLB(i){cur=i;const p=PHOTOS[i];lbImg.src=p.src;lbTitle.textContent=p.title;lbLoc.textContent=p.location+' \u00b7 '+p.year;lb.classList.add('open')}
+function step(d){cur=(cur+d+PHOTOS.length)%PHOTOS.length;openLB(cur)}
+document.getElementById('lbClose').onclick=()=>lb.classList.remove('open');
+document.getElementById('lbNext').onclick=()=>step(1);document.getElementById('lbPrev').onclick=()=>step(-1);
+lb.addEventListener('click',e=>{if(e.target===lb)lb.classList.remove('open')});
+addEventListener('keydown',e=>{if(!lb.classList.contains('open'))return;if(e.key==='Escape')lb.classList.remove('open');if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
+
+function countUp(el,t){if(!t){el.textContent='Live soon';return}let t0=performance.now();const f=v=>{v=Math.round(v);return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e4?Math.round(v/1e3)+'K':v.toLocaleString();};(function tick(n){const k=Math.min(1,(n-t0)/1400);el.textContent=f(t*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(tick)})(t0)}
+let ytDone=false;
+fetch('youtube.json').then(r=>r.json()).then(d=>{const o=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting&&!ytDone){ytDone=true;countUp(document.getElementById('ytSubs'),d.subscribers);countUp(document.getElementById('ytViews'),d.views)}}),{threshold:.4});o.observe(document.querySelector('.yt'))}).catch(()=>{});
+(async function(){
+  try{
+    const cfg=window.firebaseConfig;
+    if(!cfg||!cfg.apiKey||cfg.apiKey.startsWith('PASTE'))return;
+    const {initializeApp,getApps}=await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js');
+    const {getFirestore,collection,getDocs,query,orderBy}=await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+    const app=getApps().length?getApps()[0]:initializeApp(cfg);
+    const snap=await getDocs(query(collection(getFirestore(app),'photos'),orderBy('created','desc')));
+    snap.forEach(d=>{const p=d.data();if(p.forSale){const i=PHOTOS.length;PHOTOS.push(p);addPrint(p,i);}});
+  }catch(e){console.warn('Live prints skipped:',e);}
+})();
 
 </script>
 </body>

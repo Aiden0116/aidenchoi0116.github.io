@@ -12,13 +12,14 @@
 body{background:var(--ink);color:var(--paper);font-family:"Archivo",sans-serif;font-weight:300;min-height:100vh;padding:24px}
 h1{font-family:"Fraunces",serif;font-weight:340;font-size:1.8rem;margin-bottom:4px}
 .sub{color:var(--muted);font-size:.85rem;margin-bottom:24px}
-.box{max-width:560px;margin:8vh auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px}
+.box{max-width:620px;margin:8vh auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px}
 label{display:block;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
 input,select{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--paper);padding:13px 14px;border-radius:8px;font-family:inherit;font-size:1rem}
 input:focus,select:focus{outline:none;border-color:var(--gold)}
 button{margin-top:18px;width:100%;background:var(--gold);color:#1a1408;border:0;padding:14px;border-radius:30px;font-family:inherit;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:.3s}
-button:hover{opacity:.9}button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
-.row{display:flex;gap:12px}.row>*{flex:1}
+button:hover{opacity:.9}button:disabled{opacity:.5;cursor:default}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
 .msg{margin-top:14px;font-size:.85rem;padding:10px 12px;border-radius:8px;display:none}
 .msg.err{display:block;background:rgba(200,80,80,.12);color:#e89a9a}
 .msg.ok{display:block;background:rgba(120,180,120,.12);color:#a6d6a6}
@@ -27,6 +28,21 @@ button:hover{opacity:.9}button.ghost{background:transparent;border:1px solid var
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
 .topbar button{width:auto;margin:0;padding:10px 18px;font-size:.8rem}
 .aistatus{font-size:.78rem;color:var(--gold);margin-top:10px;min-height:1em}
+.hint{font-size:.78rem;color:var(--muted);margin-top:6px;line-height:1.5}
+/* upload queue */
+#queue{margin-top:8px}
+.qcard{display:flex;gap:12px;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:12px;position:relative}
+.qthumb{width:88px;height:88px;object-fit:cover;border-radius:6px;flex:0 0 auto}
+.qfields{flex:1;min-width:0}
+.qstatus{font-size:.72rem;color:var(--gold);min-height:1em;margin-bottom:6px}
+.qcard input,.qcard select{padding:9px 10px;font-size:.9rem;margin-bottom:6px}
+.qcard .row{gap:8px}
+.qcard .mini{margin:0;width:auto;padding:9px 12px;font-size:.74rem;background:transparent;border:1px solid var(--line);color:var(--paper);border-radius:20px}
+.qdel{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:0;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;line-height:1;padding:0;margin:0;font-size:.95rem}
+.qbar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px;display:none}
+.qbar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+.qcard.done{opacity:.5}
+/* manage grid */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:24px}
 .item{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
 .item img{width:100%;height:130px;object-fit:cover;display:block}
@@ -37,17 +53,13 @@ button:hover{opacity:.9}button.ghost{background:transparent;border:1px solid var
 .mini{width:auto;margin:8px 0 0;padding:6px 12px;font-size:.72rem;background:transparent;border:1px solid var(--line);color:var(--paper);border-radius:20px;letter-spacing:.04em}
 .editp{padding:8px 10px;border-top:1px solid var(--line)}
 .editp input,.editp select{margin-bottom:6px;padding:8px;font-size:.85rem}
-.editp .saveBtn{margin-top:4px;padding:8px}
 .note{background:rgba(200,160,106,.08);border:1px solid rgba(200,160,106,.25);border-radius:10px;padding:14px 16px;font-size:.85rem;color:#d8d3c8;margin-bottom:20px;line-height:1.5}
 .note code{color:var(--gold)}
-.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:10px;display:none}
-.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
 a{color:var(--gold)}
 </style>
 </head>
 <body>
 
-<!-- Setup notice shown until Firebase is configured -->
 <div id="setupNote" class="box">
   <h1>Studio access</h1>
   <p class="sub">Private dashboard for uploading photos.</p>
@@ -55,12 +67,11 @@ a{color:var(--gold)}
     <b>One-time setup needed.</b><br>
     This panel is ready, but it needs your free Firebase keys to switch on. Open
     <code>firebase-config.js</code>, paste your Firebase web config, and create your login in the
-    Firebase console. The setup guide walks through every step from your phone.
+    Firebase console.
   </div>
   <p class="sub">Once configured, this notice disappears and the login form appears.</p>
 </div>
 
-<!-- LOGIN -->
 <div id="login" class="box hidden">
   <h1>Studio access</h1>
   <p class="sub">Sign in to manage your gallery.</p>
@@ -70,7 +81,6 @@ a{color:var(--gold)}
   <div id="loginMsg" class="msg"></div>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dash" class="app hidden">
   <div class="topbar">
     <div><h1>Studio</h1><p class="sub" style="margin:0">Upload &amp; manage photographs</p></div>
@@ -78,23 +88,12 @@ a{color:var(--gold)}
   </div>
 
   <div class="box" style="margin:0 0 8px">
-    <label>Photo file</label><input id="file" type="file" accept="image/*"/>
+    <label>Add photos — pick one or many</label>
+    <input id="files" type="file" accept="image/*" multiple/>
+    <p class="hint">Select as many as you like (you can add more in another batch). Each gets an AI-suggested title you can tweak before uploading.</p>
     <div class="aistatus" id="aiStatus"></div>
-    <div class="row">
-      <div><label>Title</label><input id="title" placeholder="City of Light"/></div>
-      <div><label>Location</label>
-        <select id="location"><option>Vancouver</option><option>Seoul</option><option>Other</option></select>
-      </div>
-    </div>
-    <div class="row">
-      <div><label>Year</label><input id="year" placeholder="2026"/></div>
-      <div><label>For sale as print?</label>
-        <select id="forSale"><option value="false">No</option><option value="true">Yes</option></select>
-      </div>
-    </div>
-    <button class="mini" id="aiBtn" style="width:100%;margin-top:6px">✨ Re-name with AI</button>
-    <button id="uploadBtn">Upload photo</button>
-    <div class="bar" id="bar"><i></i></div>
+    <div id="queue"></div>
+    <button id="uploadAllBtn" class="hidden">Upload all (<span id="qCount">0</span>)</button>
     <div id="upMsg" class="msg"></div>
   </div>
 
@@ -102,14 +101,19 @@ a{color:var(--gold)}
 </div>
 
 <script type="module">
-// ============================================================
-//  Config comes from firebase-config.js (window.firebaseConfig) — paste once there.
-//  AI model + SDK versions are constants so they're easy to bump later.
-// ============================================================
-const AI_MODEL = "gemini-3.5-flash";   // current multimodal model on the free Gemini Developer API
-const CORE_VER = "12.14.0";            // Firebase JS SDK for auth/firestore/storage (rock solid)
-const AI_VER   = "12.14.0";            // Firebase JS SDK that includes the AI Logic module
-// ============================================================
+const AI_MODEL = "gemini-3.5-flash";
+const CORE_VER = "12.14.0";
+const AI_VER   = "12.14.0";
+
+// Clean, restrained naming — steers hard away from "AI-sounding" titles.
+const NAME_PROMPT =
+  'You are titling a photograph for a refined fine-art photography portfolio. '+
+  'Look at the image and give it a SIMPLE, CLEAN, SOPHISTICATED title — the kind a gallery prints on a small label beside the frame. '+
+  'Rules: 1 to 3 words, Title Case. Prefer the place, the subject, or a plain, understated descriptor. '+
+  'Do NOT use poetic, abstract, dramatic, or cliche AI-sounding words. '+
+  'Avoid words like: Whispers, Serenity, Ethereal, Eternal, Reflections, Symphony, Embrace, Solitude, Dreams, Journey, Essence, Tranquil, Majestic, Radiant, Golden Hour, City of Light, Threshold, Echoes, Silent, Soul, Harmony, Timeless. '+
+  'Good examples: "Coal Harbour", "Lotte Tower", "Lions Gate", "Stairwell", "Morning Market", "Night Bus", "Low Tide", "Rooftop", "Han River", "Gastown". '+
+  'Reply with ONLY compact JSON, no markdown and no extra words: {"title":"...","location":"Seoul" or "Vancouver" or ""}';
 
 const cfg = window.firebaseConfig;
 const configured = cfg && typeof cfg.apiKey === "string" && !cfg.apiKey.startsWith("PASTE");
@@ -144,7 +148,7 @@ if(configured){
   };
   $('logoutBtn').onclick=()=>signOut(auth);
 
-  // ---------- AI naming (isolated: failure here never blocks uploads) ----------
+  // ---------- AI naming (isolated: failure never blocks uploads) ----------
   let aiModel=null, aiTried=false;
   function fileToB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
   async function getAiModel(){
@@ -161,70 +165,122 @@ if(configured){
       return aiModel;
     }catch(e){console.warn('AI init failed:',e);return null;}
   }
-  async function autoName(file){
-    const s=$('aiStatus');
+  async function autoName(item){
+    const st=item.el.querySelector('.qstatus');
     const model=await getAiModel();
-    if(!model){s.textContent='AI naming unavailable — just type a title.';return;}
-    s.textContent='✨ Looking at your photo…';
+    if(!model){st.textContent='AI naming off — type a title.';return;}
+    st.textContent='\u2728 Looking at this photo\u2026';
     try{
-      const b64=await fileToB64(file);
-      const prompt='You are titling a photograph for a fine-art photography portfolio. '+
-        'Look at the image and reply with ONLY compact JSON, no markdown and no extra words: '+
-        '{"title":"<short evocative 2-4 word title in Title Case>","location":"<Seoul or Vancouver, or empty string if not clearly either>"}';
-      const res=await model.generateContent([prompt,{inlineData:{mimeType:file.type||'image/jpeg',data:b64}}]);
+      const b64=await fileToB64(item.file);
+      const res=await model.generateContent([NAME_PROMPT,{inlineData:{mimeType:item.file.type||'image/jpeg',data:b64}}]);
       let txt=res.response.text().replace(/```json/gi,'').replace(/```/g,'').trim();
       const obj=JSON.parse(txt);
-      if(obj.title && !$('title').value) $('title').value=obj.title;
-      else if(obj.title) $('title').value=obj.title;
-      if(obj.location==='Seoul'||obj.location==='Vancouver') $('location').value=obj.location;
-      s.textContent='✨ Suggested a title — tweak it if you like.';
-    }catch(e){console.warn('AI name failed:',e);s.textContent='Could not auto-name this one — just type a title.';}
+      if(obj.title) item.el.querySelector('.qTitle').value=obj.title;
+      if(obj.location==='Seoul'||obj.location==='Vancouver') item.el.querySelector('.qLoc').value=obj.location;
+      st.textContent='\u2728 Suggested a title \u2014 tweak it if you like.';
+    }catch(e){console.warn('AI name failed:',e);st.textContent='Could not name this one \u2014 type a title.';}
   }
-  $('file').onchange=e=>{const f=e.target.files[0];$('aiStatus').textContent='';if(f)autoName(f);};
-  $('aiBtn').onclick=()=>{const f=$('file').files[0];if(f)autoName(f);else $('aiStatus').textContent='Choose a photo first.';};
+  // sequential AI naming so we never hammer the free tier
+  let aiBusy=false; const aiPending=[];
+  function queueAi(item){aiPending.push(item);pumpAi();}
+  async function pumpAi(){
+    if(aiBusy)return;
+    const item=aiPending.shift();
+    if(!item)return;
+    aiBusy=true;
+    await autoName(item);
+    aiBusy=false;
+    pumpAi();
+  }
 
-  // ---------- Upload ----------
-  $('uploadBtn').onclick=()=>{
-    const f=$('file').files[0],m=$('upMsg');m.className='msg';
-    if(!f){m.className='msg err';m.textContent='Choose a photo first.';return;}
-    const path='photos/'+Date.now()+'_'+f.name.replace(/[^a-z0-9.]/gi,'_');
-    const task=uploadBytesResumable(ref(storage,path),f);
-    const bar=$('bar');bar.style.display='block';
-    task.on('state_changed',
-      s=>bar.querySelector('i').style.width=(s.bytesTransferred/s.totalBytes*100)+'%',
-      e=>{m.className='msg err';m.textContent=friendly(e);bar.style.display='none';},
-      async()=>{
+  // ---------- Upload queue ----------
+  let queue=[];
+  const qEl=$('queue');
+  const yr=String(new Date().getFullYear());
+  function refresh(){$('qCount').textContent=queue.length;$('uploadAllBtn').classList.toggle('hidden',queue.length===0);}
+  function addFiles(list){
+    [...list].forEach(f=>{
+      if(!f.type||!f.type.startsWith('image/'))return;
+      const item={file:f,done:false};
+      const el=document.createElement('div');el.className='qcard';
+      el.innerHTML=
+        `<img class="qthumb" alt=""/>
+         <div class="qfields">
+           <div class="qstatus"></div>
+           <input class="qTitle" placeholder="Title"/>
+           <div class="row">
+             <select class="qLoc"><option>Vancouver</option><option>Seoul</option><option>Other</option></select>
+             <input class="qYear" value="${yr}"/>
+           </div>
+           <div class="row">
+             <select class="qSale"><option value="false">Not for sale</option><option value="true">For sale as print</option></select>
+             <button class="mini qAi" type="button">\u2728 Re-name</button>
+           </div>
+           <div class="qbar"><i></i></div>
+         </div>
+         <button class="qdel" type="button" title="Remove">\u00d7</button>`;
+      el.querySelector('.qthumb').src=URL.createObjectURL(f);
+      item.el=el;qEl.appendChild(el);queue.push(item);
+      el.querySelector('.qdel').onclick=()=>{el.remove();queue=queue.filter(q=>q!==item);refresh();};
+      el.querySelector('.qAi').onclick=()=>queueAi(item);
+      queueAi(item);
+    });
+    refresh();
+  }
+  $('files').onchange=e=>{if(e.target.files&&e.target.files.length)addFiles(e.target.files);e.target.value='';};
+
+  $('uploadAllBtn').onclick=async()=>{
+    const btn=$('uploadAllBtn'),m=$('upMsg');m.className='msg';
+    const items=queue.filter(q=>!q.done);
+    if(!items.length)return;
+    btn.disabled=true;let ok=0;
+    for(const item of items){
+      const st=item.el.querySelector('.qstatus'),bar=item.el.querySelector('.qbar');
+      bar.style.display='block';st.textContent='Uploading\u2026';
+      try{
+        const f=item.file;
+        const path='photos/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'_'+f.name.replace(/[^a-z0-9.]/gi,'_');
+        const task=uploadBytesResumable(ref(storage,path),f);
+        await new Promise((resolve,reject)=>{
+          task.on('state_changed',
+            s=>bar.querySelector('i').style.width=(s.bytesTransferred/s.totalBytes*100)+'%',
+            reject, resolve);
+        });
         const url=await getDownloadURL(task.snapshot.ref);
         await addDoc(collection(db,'photos'),{
           src:url,storagePath:path,
-          title:$('title').value.trim()||'Untitled',
-          location:$('location').value,
-          year:$('year').value.trim()||String(new Date().getFullYear()),
-          forSale:$('forSale').value==='true',
+          title:item.el.querySelector('.qTitle').value.trim()||'Untitled',
+          location:item.el.querySelector('.qLoc').value,
+          year:item.el.querySelector('.qYear').value.trim()||yr,
+          forSale:item.el.querySelector('.qSale').value==='true',
           price:'',created:serverTimestamp()
         });
-        m.className='msg ok';m.textContent='Uploaded ✓ — it’s now live on your site.';
-        bar.style.display='none';bar.querySelector('i').style.width='0';
-        $('file').value='';$('title').value='';$('aiStatus').textContent='';
-        loadGallery();
-      });
+        item.done=true;item.el.classList.add('done');st.textContent='Uploaded \u2713';ok++;
+      }catch(e){st.textContent='Failed \u2014 '+friendly(e);}
+    }
+    btn.disabled=false;
+    // clear successfully uploaded cards
+    queue.filter(q=>q.done).forEach(q=>q.el.remove());
+    queue=queue.filter(q=>!q.done);refresh();
+    m.className='msg ok';m.textContent=ok+' photo'+(ok===1?'':'s')+' uploaded \u2713 \u2014 live on your site.';
+    loadGallery();
   };
 
   // ---------- Manage (edit + delete) ----------
   async function loadGallery(){
-    const g=$('gallery');g.innerHTML='<p class="sub">Loading…</p>';
+    const g=$('gallery');g.innerHTML='<p class="sub">Loading\u2026</p>';
     const snap=await getDocs(query(collection(db,'photos'),orderBy('created','desc')));
     g.innerHTML='';
-    if(!snap.size){g.innerHTML='<p class="sub">No photos yet — upload your first above.</p>';return;}
+    if(!snap.size){g.innerHTML='<p class="sub">No photos yet \u2014 upload your first above.</p>';return;}
     snap.forEach(d=>{
       const p=d.data();
       const el=document.createElement('div');el.className='item';
       el.innerHTML=
-        `<button class="del" title="Delete">×</button>
+        `<button class="del" title="Delete">\u00d7</button>
          <img src="${p.src}"/>
          <div class="info">
            <b>${esc(p.title)}</b>
-           <span>${esc(p.location)} · ${esc(p.year)}${p.forSale?' · print':''}</span>
+           <span>${esc(p.location)} \u00b7 ${esc(p.year)}${p.forSale?' \u00b7 print':''}</span>
            <button class="mini editBtn">Edit</button>
          </div>
          <div class="editp hidden">
@@ -243,7 +299,7 @@ if(configured){
       const editp=el.querySelector('.editp');
       el.querySelector('.editBtn').onclick=()=>editp.classList.toggle('hidden');
       el.querySelector('.saveBtn').onclick=async(ev)=>{
-        const btn=ev.target;btn.textContent='Saving…';
+        const btn=ev.target;btn.textContent='Saving\u2026';
         try{
           await updateDoc(doc(db,'photos',d.id),{
             title:el.querySelector('.eTitle').value.trim()||'Untitled',
@@ -251,7 +307,7 @@ if(configured){
             forSale:el.querySelector('.eSale').value==='true'
           });
           loadGallery();
-        }catch(e){btn.textContent='Error — retry';}
+        }catch(e){btn.textContent='Error \u2014 retry';}
       };
       el.querySelector('.del').onclick=async()=>{
         if(!confirm('Delete "'+p.title+'"? This removes it from your site.'))return;
@@ -266,7 +322,8 @@ if(configured){
   function friendly(e){const c=(e&&e.code)||'';
     if(c.includes('wrong-password')||c.includes('invalid-credential'))return 'Wrong email or password.';
     if(c.includes('user-not-found'))return 'No account with that email. Create it in the Firebase console.';
-    if(c.includes('too-many-requests'))return 'Too many tries — wait a moment.';
+    if(c.includes('too-many-requests'))return 'Too many tries \u2014 wait a moment.';
+    if(c.includes('unauthorized')||c.includes('permission'))return 'Permission denied \u2014 check your Storage/Firestore rules.';
     return (e&&e.message)||'Something went wrong.';}
 }
 </script>
