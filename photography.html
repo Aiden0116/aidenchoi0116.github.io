@@ -200,6 +200,7 @@ footer a{color:var(--muted)}footer a:hover{color:var(--gold)}footer .admin{opaci
 <script src="firebase-config.js"></script>
 <script>
 
+(function(){var exts=['jpeg','jpg','png','webp'];document.addEventListener('error',function(e){var img=e.target;if(!img||img.tagName!=='IMG')return;if(img.src.indexOf(location.origin)!==0)return;var m=img.src.match(/^(.*)\.([a-z0-9]+)$/i);if(!m)return;var tried=img.dataset.tried?img.dataset.tried.split(','):[m[2].toLowerCase()];var next=exts.filter(function(x){return tried.indexOf(x)<0;})[0];if(!next)return;tried.push(next);img.dataset.tried=tried.join(',');img.src=m[1]+'.'+next;},true);})();
 const nav=document.getElementById('nav');
 addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40));
 const tg=document.getElementById('navtoggle'),lk=document.getElementById('navlinks');
