@@ -210,14 +210,14 @@ const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 const PHOTOS=[
-{src:'p1.jpg',title:'Seoul Skyline',location:'Seoul',year:'2024',forSale:true,price:''},
-{src:'p2.jpg',title:'Coal Harbour',location:'Vancouver',year:'2024',forSale:true,price:''},
-{src:'p3.jpg',title:'Lotte Tower',location:'Seoul',year:'2024',forSale:true,price:''},
-{src:'p4.jpg',title:'Lions Gate',location:'Vancouver',year:'2024',forSale:true,price:''},
-{src:'p5.jpg',title:'Stairwell',location:'Seoul',year:'2024',forSale:false,price:''},
-{src:'p6.jpg',title:'Nightcap',location:'Vancouver',year:'2024',forSale:false,price:''},
-{src:'p7.jpg',title:'Aged',location:'Vancouver',year:'2024',forSale:false,price:''},
-{src:'p8.jpg',title:'Luigi & Sons',location:'Vancouver',year:'2024',forSale:false,price:''}
+{src:'p1.jpeg',title:'Seoul Skyline',location:'Seoul',year:'2024',forSale:true,price:''},
+{src:'p2.jpeg',title:'Coal Harbour',location:'Vancouver',year:'2024',forSale:true,price:''},
+{src:'p3.jpeg',title:'Lotte Tower',location:'Seoul',year:'2024',forSale:true,price:''},
+{src:'p4.jpeg',title:'Lions Gate',location:'Vancouver',year:'2024',forSale:true,price:''},
+{src:'p5.jpeg',title:'Stairwell',location:'Seoul',year:'2024',forSale:false,price:''},
+{src:'p6.jpeg',title:'Nightcap',location:'Vancouver',year:'2024',forSale:false,price:''},
+{src:'p7.jpeg',title:'Aged',location:'Vancouver',year:'2024',forSale:false,price:''},
+{src:'p8.jpeg',title:'Luigi & Sons',location:'Vancouver',year:'2024',forSale:false,price:''}
 ];
 const masonry=document.getElementById('masonry');
 function addTile(p,i){
