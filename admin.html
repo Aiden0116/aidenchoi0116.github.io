@@ -165,6 +165,31 @@ if(configured){
       return aiModel;
     }catch(e){console.warn('AI init failed:',e);return null;}
   }
+  // ---------- EXIF metadata (capture year + GPS) — optional, graceful ----------
+  let exifrMod; // undefined = untried, null = unavailable
+  async function getExifr(){
+    if(exifrMod!==undefined) return exifrMod;
+    try{ exifrMod=(await import('https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.esm.mjs')).default; }
+    catch(e){ console.warn('exifr load failed:',e); exifrMod=null; }
+    return exifrMod;
+  }
+  function mapLoc(lat,lng){
+    if(lat>37&&lat<37.8&&lng>126.6&&lng<127.3) return 'Seoul';
+    if(lat>49&&lat<49.4&&lng>-123.4&&lng<-122.6) return 'Vancouver';
+    return '';
+  }
+  async function prefillExif(item){
+    const ex=await getExifr(); if(!ex) return;
+    try{
+      const d=await ex.parse(item.file,{tiff:true,exif:true,gps:true})||{};
+      const dt=d.DateTimeOriginal||d.CreateDate||d.ModifyDate;
+      if(dt){const y=new Date(dt).getFullYear(); if(y>1990&&y<2100){item.el.querySelector('.qYear').value=String(y); item.exifYear=y;}}
+      if(typeof d.latitude==='number'&&typeof d.longitude==='number'){
+        const loc=mapLoc(d.latitude,d.longitude);
+        if(loc){item.el.querySelector('.qLoc').value=loc; item.locFromExif=true;}
+      }
+    }catch(e){console.warn('exif parse failed:',e);}
+  }
   async function autoName(item){
     const st=item.el.querySelector('.qstatus');
     const model=await getAiModel();
@@ -176,8 +201,8 @@ if(configured){
       let txt=res.response.text().replace(/```json/gi,'').replace(/```/g,'').trim();
       const obj=JSON.parse(txt);
       if(obj.title) item.el.querySelector('.qTitle').value=obj.title;
-      if(obj.location==='Seoul'||obj.location==='Vancouver') item.el.querySelector('.qLoc').value=obj.location;
-      st.textContent='\u2728 Suggested a title \u2014 tweak it if you like.';
+      if(!item.locFromExif && (obj.location==='Seoul'||obj.location==='Vancouver')) item.el.querySelector('.qLoc').value=obj.location;
+      st.textContent=(item.exifYear?('Taken '+item.exifYear+' \u00b7 '):'')+'\u2728 Title suggested \u2014 tweak if you like.';
     }catch(e){console.warn('AI name failed:',e);st.textContent='Could not name this one \u2014 type a title.';}
   }
   // sequential AI naming so we never hammer the free tier
@@ -223,7 +248,8 @@ if(configured){
       item.el=el;qEl.appendChild(el);queue.push(item);
       el.querySelector('.qdel').onclick=()=>{el.remove();queue=queue.filter(q=>q!==item);refresh();};
       el.querySelector('.qAi').onclick=()=>queueAi(item);
-      queueAi(item);
+      item.el.querySelector('.qstatus').textContent='Reading photo details\u2026';
+      prefillExif(item).finally(()=>queueAi(item));
     });
     refresh();
   }
